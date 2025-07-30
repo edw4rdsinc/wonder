@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whimsy & Wonder - Floral Atelier</title>
+    
+    <!-- Google Fonts: Source Serif Pro for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Source+Serif+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /*
+         * VISUAL STYLE GUIDE (CSS VARIABLES)
+         * "Old-World Botanical Atelier" aesthetic.
+        */
+        :root {
+            --bg-color: #F8F5F2; /* Soft, parchment-like cream from logo */
+            --text-color: #2c2c2c; /* Rich, soft black ink color */
+            --accent-color: #8A6B7A; /* Deep, dusty mauve from tulips */
+            --accent-hover: #6D5561; /* A darker, richer mauve for hover */
+            --border-color: #EAE2D9; /* A very subtle, warm border color */
+            --card-bg: #FFFFFF;
+            --font-heading: 'Source Serif Pro', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        /*
+         * GENERAL STYLING & RESETS
+        */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 120px 20px;
+        }
+        
+        main .container:first-child {
+            padding-top: 60px;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 3.5rem; }
+        h2 { font-size: 3rem; text-align: center; }
+        p { margin-bottom: 20px; max-width: 650px; }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        /*
+         * SCROLL ANIMATION STYLES
+        */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /*
+         * VISUAL TRANSITION / SEPARATOR
+        */
+        .section-separator {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .section-separator svg {
+            width: 100px;
+            height: auto;
+            fill: var(--border-color);
+        }
+
+        /*
+         * HEADER & NAVIGATION
+        */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(248, 245, 242, 0.85);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-link {
+            display: block;
+            height: 60px;
+        }
+        .logo {
+            height: 100%;
+            width: auto;
+        }
+
+        .main-nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .main-nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        /*
+         * BUTTONS & CALLS TO ACTION (CTA)
+        */
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 15px 30px;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            border: 1px solid var(--accent-color);
+        }
+
+        .cta-button:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        
+        .cta-button.secondary {
+            background-color: transparent;
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        .cta-button.secondary:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        /*
+         * HERO SECTION
+        */
+        .hero {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            min-height: calc(100vh - 91px);
+        }
+        .hero-text { flex: 1; }
+        .hero-image { 
+            flex: 1; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        .hero h1 { margin-top: 0; }
+        .hero p { font-size: 1.2rem; font-weight: 400; }
+        .hero .cta-button { margin-top: 20px; }
+
+        /*
+         * CONTENT SECTIONS
+        */
+        .content-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .content-section .text-content { padding-right: 20px; }
+        .content-section.reverse .text-content {
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+            padding-left: 20px;
+            padding-right: 0;
+        }
+        .content-section.reverse .image-content { grid-column: 2 / 3; }
+        .content-section h2 { text-align: left; }
+        
+        .centered-text-section { text-align: center; }
+        .centered-text-section p { margin-left: auto; margin-right: auto; font-size: 1.1rem; }
+        .centered-text-section h2 { margin-bottom: 40px; }
+
+        /*
+         * WHAT WE OFFER SECTION
+        */
+        .offer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        .offer-item {
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 25px;
+            position: relative;
+            color: #fff;
+            overflow: hidden;
+            transition: transform 0.4s ease;
+        }
+        .offer-item:hover {
+            transform: scale(1.03);
+        }
+        .offer-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
+            z-index: 1;
+        }
+        .offer-item-content {
+            position: relative;
+            z-index: 2;
+        }
+        .offer-item h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        .offer-item p { 
+            line-height: 1.5;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /*
+         * UPDATED: HOW IT WORKS SECTION
+        */
+        .how-it-works-content {
+            text-align: left;
+        }
+        .how-it-works-content h2 {
+            text-align: left;
+            margin-bottom: 40px;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .step .step-number {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            line-height: 1;
+            opacity: 0.5;
+        }
+        .step-text h3 { font-size: 1.5rem; margin-bottom: 5px; }
+        .step-text p { margin-bottom: 0; }
+
+
+        /* PARALLAX SECTION */
+        .parallax {
+            background-image: url('images/parallax.png');
+            min-height: 500px;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+
+        /* FINAL CTA SECTION */
+        .final-cta { text-align: center; }
+        .final-cta-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        /*
+         * RESPONSIVE DESIGN
+        */
+        @media (max-width: 900px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.5rem; }
+            .container { padding: 80px 20px; }
+            .hero { flex-direction: column; gap: 40px; min-height: auto; text-align: center; }
+            .hero-image { order: -1; }
+            .content-section, .content-section.reverse {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .content-section.reverse .text-content, .content-section.reverse .image-content {
+                grid-column: 1 / 2;
+            }
+            .content-section .text-content { padding: 0; }
+            .content-section h2, .how-it-works-content h2 { text-align: center; }
+            .content-section p { margin-left: auto; margin-right: auto; text-align: center; }
+        }
+        
+        @media (max-width: 600px) {
+            .main-header { flex-direction: column; gap: 15px; }
+            .main-nav { display: flex; flex-wrap: wrap; justify-content: center; }
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 2rem; }
+            .final-cta-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. HEADER -->
+    <header class="main-header">
+        <a href="#" class="logo-link">
+            <img src="images/ww-logo.png" alt="Whimsy & Wonder Floral Atelier Logo" class="logo">
+        </a>
+        <nav class="main-nav">
+            <a href="#approach">Approach</a>
+            <a href="#offerings">Offerings</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- 2. HERO SECTION -->
+        <section class="container hero">
+            <div class="hero-text fade-in-section">
+                <h1>Bring Wonder Into Every Space</h1>
+                <p><strong>Artistic floral arrangements that transform your everyday environment into something extraordinary.</strong></p>
+                <a href="#contact" class="cta-button">Order Your Custom Arrangement</a>
+            </div>
+            <div class="hero-image fade-in-section">
+                <img src="images/hero.png" alt="A beautiful, artistic wedding bouquet with pink and dark flowers against a stone wall." onerror="this.onerror=null;this.src='https://placehold.co/600x750/F8F5F2/2c2c2c?text=Whimsy+%26+Wonder';">
+            </div>
+        </section>
+        
+        <!-- 3. EMPATHETIC HOOK SECTION -->
+        <section class="container centered-text-section fade-in-section">
+            <h2>You’re tired of generic flowers that feel impersonal and uninspired.</h2>
+            <p>You've created a beautiful home or workspace—your flowers should reflect your unique taste, story, and appreciation for artistry. Wonder Meadow honors your desire for meaningful beauty with thoughtfully crafted, garden-inspired arrangements.</p>
+        </section>
+
+        <!-- 4. VISUAL SEPARATOR -->
+        <div class="section-separator fade-in-section">
+            <svg viewBox="0 0 200 20" stroke="none" fill="var(--border-color)"><path d="M0 10 C 40 20, 60 0, 100 10 S 160 0, 200 10"></path></svg>
+        </div>
+
+        <!-- 5. APPROACH / PHILOSOPHY SECTION -->
+        <section id="approach" class="container content-section fade-in-section">
+            <div class="image-content">
+                <img src="images/dutch-still-life-2.png" alt="A floral artist's workbench with flowers and tools laid out." onerror="this.onerror=null;this.src='https://placehold.co/600x700/F8F5F2/2c2c2c?text=Our+Approach';">
+            </div>
+            <div class="text-content">
+                <h2>Inspired by the rich textures of gardens and the artistry of the Dutch masters...</h2>
+                <p>Wonder Meadow uniquely blends emotion and elegance. Each arrangement, created by Kelly Moore, speaks to your senses, inviting you to slow down and appreciate life's simple, profound beauty.</p>
+            </div>
+        </section>
+
+        <!-- 6. VISUAL SEPARATOR -->
+        <div class="section-separator fade-in-section">
+            <svg viewBox="0 0 200 20" stroke="none" fill="var(--border-color)"><path d="M0 10 C 40 20, 60 0, 100 10 S 160 0, 200 10"></path></svg>
+        </div>
+
+        <!-- 7. WHAT THEY OFFER SECTION -->
+        <section id="offerings" class="container centered-text-section fade-in-section">
+            <h2>What We Offer</h2>
+            <div class="offer-grid">
+                <div class="offer-item" style="background-image: url('images/subscriptions.jpg');">
+                    <div class="offer-item-content">
+                        <h3>Weekly Floral Subscriptions</h3>
+                        <p>Regular beauty, uniquely designed for your home or business.</p>
+                    </div>
+                </div>
+                <div class="offer-item" style="background-image: url('images/custom-arrangements.png');">
+                    <div class="offer-item-content">
+                        <h3>Custom Arrangements</h3>
+                        <p>Personal, artistic creations for special events and moments.</p>
+                    </div>
+                </div>
+                <div class="offer-item" style="background-image: url('images/workshops.png');">
+                    <div class="offer-item-content">
+                        <h3>Wreath & Floral Workshops</h3>
+                        <p>Hands-on experiences to connect deeply with floral artistry.</p>
+                    </div>
+                </div>
+                <div class="offer-item" style="background-image: url('images/dried-1.jpg');">
+                    <div class="offer-item-content">
+                        <h3>Dried Flower Arrangements</h3>
+                        <p>Sustainably beautiful options for lasting impact.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. PARALLAX SECTION -->
+        <section class="parallax"></section>
+
+        <!-- 9. HOW IT WORKS SECTION -->
+        <section class="container content-section fade-in-section">
+            <div class="image-content">
+                 <img src="images/how-it-works.png" alt="Hands carefully placing a flower into an arrangement." onerror="this.onerror=null;this.src='https://placehold.co/600x700/F8F5F2/2c2c2c?text=How+It+Works';">
+            </div>
+            <div class="how-it-works-content">
+                <h2>How It Works</h2>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <h3>Choose Your Service</h3>
+                        <p>Subscription, custom arrangement, or workshop.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <h3>Personalize & Order</h3>
+                        <p>Tell us your style or special request.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <h3>Enjoy Inspired Beauty</h3>
+                        <p>Receive unique, artful arrangements crafted just for you.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 10. VISUAL SEPARATOR -->
+        <div class="section-separator fade-in-section">
+            <svg viewBox="0 0 200 20" stroke="none" fill="var(--border-color)"><path d="M0 10 C 40 20, 60 0, 100 10 S 160 0, 200 10"></path></svg>
+        </div>
+
+        <!-- 11. WHY IT WORKS (DIFFERENTIATOR) SECTION -->
+        <section class="container content-section reverse fade-in-section">
+            <div class="text-content">
+                <h2>Wonder Meadow's floral arrangements aren’t just bouquets...</h2>
+                <p>...they’re personal, emotional experiences inspired by Kelly’s lifelong love of flowers.</p>
+            </div>
+            <div class="image-content">
+                <img src="images/why-it-works.png" alt="A moody, artistic still life of tulips and other florals against a dark background." onerror="this.onerror=null;this.src='https://placehold.co/600x700/F8F5F2/2c2c2c?text=Why+Us%3F';">
+            </div>
+        </section>
+
+        <!-- 12. FINAL CTA SECTION -->
+        <section id="contact" class="container final-cta fade-in-section">
+            <h2>Ready to fill your space with wonder?</h2>
+            <div class="final-cta-buttons">
+                <a href="#" class="cta-button secondary">Explore Our Gallery</a>
+                <a href="#" class="cta-button">Order Your Custom Arrangement</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- JAVASCRIPT FOR SCROLL ANIMATIONS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const sections = document.querySelectorAll('.fade-in-section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
