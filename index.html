@@ -301,6 +301,13 @@
         /*
          * RESPONSIVE DESIGN
         */
+        @media (max-width: 1024px) {
+            /* NEW: Disables parallax effect on tablets and mobile phones */
+            .parallax {
+                background-attachment: scroll;
+            }
+        }
+
         @media (max-width: 900px) {
             h1 { font-size: 2.8rem; }
             h2 { font-size: 2.5rem; }
@@ -499,4 +506,5 @@
 
 </body>
 </html>
+
 
