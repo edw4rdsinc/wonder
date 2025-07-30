@@ -109,7 +109,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 5%;
+            padding: 20px 5%; /* Increased padding for larger logo */
             border-bottom: 1px solid var(--border-color);
             background-color: rgba(248, 245, 242, 0.85);
             backdrop-filter: blur(10px);
@@ -120,7 +120,7 @@
 
         .logo-link {
             display: block;
-            height: 60px;
+            height: 80px; /* UPDATED: Made logo larger */
         }
         .logo {
             height: 100%;
@@ -177,7 +177,7 @@
             display: flex;
             align-items: center;
             gap: 60px;
-            min-height: calc(100vh - 91px);
+            min-height: calc(100vh - 121px); /* Adjusted for larger header */
         }
         .hero-text { flex: 1; }
         .hero-image { 
@@ -212,49 +212,37 @@
         .centered-text-section h2 { margin-bottom: 40px; }
 
         /*
-         * WHAT WE OFFER SECTION
+         * UPDATED: WHAT WE OFFER SECTION
         */
         .offer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted for 3 items */
             gap: 30px;
             margin-top: 60px;
         }
         .offer-item {
-            background-size: cover;
-            background-position: center;
+            background: var(--card-bg);
             border-radius: 8px;
-            min-height: 350px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 25px;
-            position: relative;
-            color: #fff;
-            overflow: hidden;
-            transition: transform 0.4s ease;
+            border: 1px solid var(--border-color);
+            overflow: hidden; /* Ensures image corners are rounded */
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            text-align: left;
         }
         .offer-item:hover {
-            transform: scale(1.03);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
         }
-        .offer-item::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
-            z-index: 1;
+        .offer-item img {
+            border-radius: 0;
+            border-bottom: 1px solid var(--border-color);
         }
         .offer-item-content {
-            position: relative;
-            z-index: 2;
+            padding: 25px;
         }
         .offer-item h3 {
             font-size: 1.8rem;
             margin-bottom: 5px;
-            color: #fff;
+            color: var(--text-color);
         }
         .offer-item p { 
             line-height: 1.5;
@@ -263,7 +251,7 @@
         }
 
         /*
-         * UPDATED: HOW IT WORKS SECTION
+         * HOW IT WORKS SECTION
         */
         .how-it-works-content {
             text-align: left;
@@ -371,7 +359,7 @@
         <!-- 3. EMPATHETIC HOOK SECTION -->
         <section class="container centered-text-section fade-in-section">
             <h2>You’re tired of generic flowers that feel impersonal and uninspired.</h2>
-            <p>You've created a beautiful home or workspace—your flowers should reflect your unique taste, story, and appreciation for artistry. Wonder Meadow honors your desire for meaningful beauty with thoughtfully crafted, garden-inspired arrangements.</p>
+            <p>You've created a beautiful home or workspace—your flowers should reflect your unique taste, story, and appreciation for artistry. Whimsy & Wonder honors your desire for meaningful beauty with thoughtfully crafted, garden-inspired arrangements.</p>
         </section>
 
         <!-- 4. VISUAL SEPARATOR -->
@@ -386,7 +374,7 @@
             </div>
             <div class="text-content">
                 <h2>Inspired by the rich textures of gardens and the artistry of the Dutch masters...</h2>
-                <p>Wonder Meadow uniquely blends emotion and elegance. Each arrangement, created by Kelly Moore, speaks to your senses, inviting you to slow down and appreciate life's simple, profound beauty.</p>
+                <p>Whimsy & Wonder uniquely blends emotion and elegance. Each arrangement, created by Kelly Moore, speaks to your senses, inviting you to slow down and appreciate life's simple, profound beauty.</p>
             </div>
         </section>
 
@@ -399,28 +387,25 @@
         <section id="offerings" class="container centered-text-section fade-in-section">
             <h2>What We Offer</h2>
             <div class="offer-grid">
-                <div class="offer-item" style="background-image: url('images/subscriptions.jpg');">
+                <div class="offer-item">
+                    <img src="images/subscriptions.jpg" alt="A beautiful floral arrangement for a subscription service.">
                     <div class="offer-item-content">
                         <h3>Weekly Floral Subscriptions</h3>
                         <p>Regular beauty, uniquely designed for your home or business.</p>
                     </div>
                 </div>
-                <div class="offer-item" style="background-image: url('images/custom-arrangements.png');">
+                <div class="offer-item">
+                    <img src="images/custom-arrangements.png" alt="A custom floral arrangement in a vase.">
                     <div class="offer-item-content">
                         <h3>Custom Arrangements</h3>
                         <p>Personal, artistic creations for special events and moments.</p>
                     </div>
                 </div>
-                <div class="offer-item" style="background-image: url('images/workshops.png');">
+                <div class="offer-item">
+                    <img src="images/workshops.png" alt="Hands-on floral workshop in session.">
                     <div class="offer-item-content">
                         <h3>Wreath & Floral Workshops</h3>
                         <p>Hands-on experiences to connect deeply with floral artistry.</p>
-                    </div>
-                </div>
-                <div class="offer-item" style="background-image: url('images/dried-1.jpg');">
-                    <div class="offer-item-content">
-                        <h3>Dried Flower Arrangements</h3>
-                        <p>Sustainably beautiful options for lasting impact.</p>
                     </div>
                 </div>
             </div>
@@ -468,7 +453,7 @@
         <!-- 11. WHY IT WORKS (DIFFERENTIATOR) SECTION -->
         <section class="container content-section reverse fade-in-section">
             <div class="text-content">
-                <h2>Wonder Meadow's floral arrangements aren’t just bouquets...</h2>
+                <h2>Whimsy & Wonder's floral arrangements aren’t just bouquets...</h2>
                 <p>...they’re personal, emotional experiences inspired by Kelly’s lifelong love of flowers.</p>
             </div>
             <div class="image-content">
@@ -514,3 +499,4 @@
 
 </body>
 </html>
+
