@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Whimsy & Wonder – Custom Arrangement Widget</title>
+<style>
+  :root{
+    --ink:#0e0b0a; --velvet:#1c1513; --gild:#b48a2a; --ivory:#f5efe6; --sage:#9fb3a6; --crimson:#6d1f25;
+    --shadow: 0 12px 30px rgba(0,0,0,.35);
+    --card: linear-gradient(180deg, rgba(32,25,22,.85), rgba(20,14,12,.92));
+    --burlap: radial-gradient(1200px 600px at 10% 10%, rgba(255,255,255,.03) 0, transparent 60%),
+              radial-gradient(900px 500px at 90% 30%, rgba(255,255,255,.025) 0, transparent 70%),
+              repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px),
+              repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px);
+  }
+  html,body{height:100%}
+  body{
+    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 700px at 75% 10%, #1f1715, #0c0908 60%),
+                radial-gradient(900px 600px at 20% 80%, #251a16, transparent 60%);
+    color:var(--ivory);
+  }
+  .wrap{min-height:100%; display:grid; grid-template-rows:auto 1fr; background: var(--burlap);}
+  header{padding:24px 20px 0; max-width:960px; margin:0 auto;}
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand h1{font-size: clamp(20px, 3.5vw, 32px); margin:0; letter-spacing:.02em}
+  .brand .tag{color:var(--gild); font-variant: small-caps; opacity:.9}
+  .widget{max-width:960px; margin:18px auto 60px; padding:20px;}
+  .progress{display:flex; gap:8px; margin-bottom:14px; align-items:center;}
+  .dot{width:8px; height:8px; border-radius:999px; background:#3a2d29; outline:1px solid rgba(180,138,42,.25)}
+  .dot.active{background:var(--gild)}
+  .stack{position:relative; perspective: 1200px; display:grid; gap:14px;}
+  .card{border:1px solid rgba(180,138,42,.22); background: var(--card); box-shadow: var(--shadow);
+        border-radius:16px; padding:18px; transform-origin: top center; will-change: transform, opacity;
+        animation: cardIn .45s cubic-bezier(.2,.8,.25,1) both;}
+  .card.out{animation: cardOut .38s cubic-bezier(.2,.8,.25,1) forwards;}
+  @keyframes cardIn{from{opacity:0; transform: translateY(14px) scale(.98) rotateX(-6deg)} to{opacity:1; transform: translateY(0) scale(1) rotateX(0)}}
+  @keyframes cardOut{from{opacity:1; transform: translateY(0) scale(1)} to{opacity:0; transform: translateY(-22px) scale(.98)}}
+  .card h2{margin:4px 0 10px; font-size:20px; letter-spacing:.02em}
+  .hint{opacity:.8; font-size:14px; margin-top:-4px; margin-bottom:8px}
+  .grid{display:grid; gap:10px; grid-template-columns: repeat(1, minmax(0,1fr));}
+  @media(min-width:720px){ .grid{grid-template-columns: repeat(3, minmax(0,1fr));} }
+  .opt{position:relative; border:1px solid rgba(180,138,42,.22); border-radius:12px; padding:12px; cursor:pointer;
+       display:flex; flex-direction:column; gap:6px; background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));}
+  .opt input{position:absolute; inset:0; opacity:0; pointer-events:none}
+  .opt:hover{border-color: rgba(180,138,42,.38)}
+  .opt.active{outline:2px solid var(--gild); border-color:var(--gild)}
+  .opt .title{font-weight:600}
+  .badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; opacity:.85}
+  .pill{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid rgba(180,138,42,.35); color:var(--gild)}
+  .palette{height:110px; border-radius:8px; border:1px solid rgba(180,138,42,.2); background-size:cover; background-position:center; background-repeat:no-repeat; margin-bottom:6px; filter: saturate(.95) contrast(1.05);}
+  /* Placeholder palette images (swap for real photos later) */
+  .p-soft{background-image: linear-gradient(135deg,#f2d9df,#f6efe7 60%, #d9cfd0)}
+  .p-golden{background-image: linear-gradient(135deg,#ffd277,#f6a36a 50%,#f7d4a8)}
+  .p-moody{background-image: linear-gradient(135deg,#3a0d12,#2b0a2b 50%,#110910)}
+  .p-whimsy{background-image: linear-gradient(135deg,#e94a8a,#ffd85f 45%,#7ed957)}
+  .p-ethereal{background-image: linear-gradient(135deg,#b8c7e6,#cfd8f6 50%,#b7d0c5)}
+  .p-still{background-image: linear-gradient(135deg,#6d1f25,#0f1e3a 50%,#b48a2a)}
+  .row{display:grid; gap:10px; grid-template-columns:1fr}
+  @media(min-width:720px){ .row{grid-template-columns:1fr 1fr} }
+  input[type="text"], input[type="date"], textarea{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(180,138,42,.25);
+    background:rgba(255,255,255,.03); color:var(--ivory); outline:none;
+  }
+  textarea{min-height:90px; resize:vertical}
+  .toggle{display:flex; align-items:center; gap:10px}
+  .toggle input{width:18px; height:18px}
+  .actions{display:flex; justify-content:flex-end; gap:10px; margin-top:10px}
+  .btn{background: linear-gradient(180deg, #caa145, #a77e1f); color:#140e0c; border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer;}
+  .btn.ghost{background: transparent; color:var(--gild); border:1px solid rgba(180,138,42,.45)}
+  .summary{font-size:14px; line-height:1.5; opacity:.95; border-top:1px dashed rgba(180,138,42,.35); padding-top:10px; margin-top:10px}
+  .sr{position:absolute; left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Whimsy & Wonder</h1>
+      <div class="tag">Custom Floral Arrangement</div>
+    </div>
+  </header>
+
+  <main class="widget" aria-live="polite">
+    <div class="progress" id="progress" aria-label="Progress">
+      <div class="dot active" title="Size"></div>
+      <div class="dot" title="Palette"></div>
+      <div class="dot" title="Personal Touch"></div>
+      <div class="dot" title="Delivery"></div>
+      <div class="dot" title="Review"></div>
+    </div>
+
+    <section class="stack" id="stack"><!-- Cards injected here --></section>
+  </main>
+</div>
+
+<script>
+/* -------- State -------- */
+const state = {
+  productType: 'one-time',
+  size: null,                 // 'petite'|'classic'|'grand'
+  palette: null,              // 'soft'|'golden'|'moody'|'whimsy'|'ethereal'|'still'|'secret'
+  noteCard: false,
+  noteText: '',
+  special: '',
+  deliveryDate: '',
+  address: '',
+};
+
+/* -------- Options -------- */
+const sizeOptions = [
+  {id:'petite', title:'Petite Whimsy', desc:'A delicate burst for small spaces.'},
+  {id:'classic', title:'Classic Wonder', desc:'A versatile, medium centerpiece.'},
+  {id:'grand', title:'Grand Enchantment', desc:'Lush and abundant, a statement piece.'},
+];
+
+const palettes = [
+  {id:'soft',    title:'Soft Romance',       cls:'p-soft',    desc:'Blush, ivory, and dusty pinks with airy greens.'},
+  {id:'golden',  title:'Golden Joy',         cls:'p-golden',  desc:'Sunlit yellows, apricots, and warm peaches.'},
+  {id:'moody',   title:'Moody Enchantment',  cls:'p-moody',   desc:'Deep burgundy, plum, and midnight tones.'},
+  {id:'whimsy',  title:'Garden Whimsy',      cls:'p-whimsy',  desc:'Playful mix of bright colors and textures.'},
+  {id:'ethereal',title:'Ethereal Meadow',    cls:'p-ethereal',desc:'Soft blues, lavender, and silvery greens.'},
+  {id:'still',   title:'Still Life Splendor',cls:'p-still',   desc:'Jewel tones with dramatic contrast (Dutch masters).'},
+  {id:'secret',  title:'The Secret Garden',  cls:'p-still',   desc:'Trust the artist — a surprise composition from the freshest blooms.'},
+];
+
+/* -------- Utilities -------- */
+const stack = document.getElementById('stack');
+const progress = document.getElementById('progress').children;
+function setStepActive(idx){ [...progress].forEach((d,i)=>d.classList.toggle('active', i<=idx)); }
+function pushCard(el){ stack.appendChild(el); requestAnimationFrame(()=>{ el.style.animationDelay = '0ms'; }); }
+function popCard(){ const last = stack.lastElementChild; if(!last) return; last.classList.add('out'); last.addEventListener('animationend', ()=> last.remove(), {once:true}); }
+function next(fn){ setTimeout(fn, 180); }
+
+/* -------- Card Builders -------- */
+function cardSize(){
+  setStepActive(0);
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.innerHTML = `
+    <h2>Choose Size</h2>
+    <p class="hint">Start with the scale and budget that fits.</p>
+    <div class="grid" role="group" aria-label="Size options">
+      ${sizeOptions.map(o=>`
+        <label class="opt">
+          <input type="radio" name="size" value="${o.id}" />
+          <span class="title">${o.title}</span>
+          <span class="badge"><span class="pill">Small/Med/Large</span> ${o.desc}</span>
+        </label>
+      `).join('')}
+    </div>
+    <div class="actions">
+      <button class="btn" id="sizeNext" disabled>Next</button>
+    </div>
+  `;
+  // interactions
+  card.querySelectorAll('label.opt').forEach(l=>{
+    l.addEventListener('click', ()=>{
+      card.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      l.classList.add('active');
+      state.size = l.querySelector('input').value;
+      card.querySelector('#sizeNext').disabled = !state.size;
+    });
+  });
+  card.querySelector('#sizeNext').addEventListener('click', ()=>{
+    popCard();
+    next(()=> pushCard(cardPalette()));
+  });
+  return card;
+}
+
+function cardPalette(){
+  setStepActive(1);
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.innerHTML = `
+    <h2>Choose Mood / Palette</h2>
+    <p class="hint">Pick the feeling. Photos are examples; flowers vary with season.</p>
+    <div class="grid" role="group" aria-label="Palette options">
+      ${palettes.map(p=>`
+        <label class="opt">
+          <input type="radio" name="palette" value="${p.id}"/>
+          <div class="palette ${p.cls}" aria-hidden="true"></div>
+          <span class="title">${p.title}</span>
+          <span class="badge">${p.desc}</span>
+        </label>
+      `).join('')}
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="palNext" disabled>Next</button>
+    </div>
+  `;
+  card.querySelectorAll('label.opt').forEach(l=>{
+    l.addEventListener('click', ()=>{
+      card.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      l.classList.add('active');
+      state.palette = l.querySelector('input').value;
+      card.querySelector('#palNext').disabled = !state.palette;
+    });
+  });
+  card.querySelector('#back').addEventListener('click', ()=>{
+    popCard();
+    state.palette = null;
+    next(()=> pushCard(cardSize()));
+  });
+  card.querySelector('#palNext').addEventListener('click', ()=>{
+    popCard();
+    next(()=> pushCard(cardPersonal()));
+  });
+  return card;
+}
+
+function cardPersonal(){
+  setStepActive(2);
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.innerHTML = `
+    <h2>Personal Touch</h2>
+    <div class="grid">
+      <div class="opt" style="cursor:default">
+        <div class="toggle">
+          <input type="checkbox" id="noteToggle" ${state.noteCard?'checked':''}/>
+          <label for="noteToggle"><strong>Handwritten Card</strong> — add a message to be handwritten by Kelly</label>
+        </div>
+        <div id="noteArea" style="margin-top:8px; ${state.noteCard?'':'display:none'}">
+          <textarea id="noteText" maxlength="200" placeholder="Your message (max 200 characters)">${state.noteText||''}</textarea>
+          <div class="hint"><span class="pill">Tip</span> Keep it short so it looks lovely on paper.</div>
+        </div>
+      </div>
+      <div class="opt" style="cursor:default">
+        <label for="special"><strong>Special Requests</strong></label>
+        <textarea id="special" placeholder="Loves peonies? Avoid lilies? Occasion details? (optional)">${state.special||''}</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="next">Next</button>
+    </div>
+  `;
+  const noteToggle = card.querySelector('#noteToggle');
+  const noteArea = card.querySelector('#noteArea');
+  const noteText = card.querySelector('#noteText');
+  const special = card.querySelector('#special');
+  noteToggle.addEventListener('change', ()=>{ state.noteCard = noteToggle.checked; noteArea.style.display = state.noteCard ? 'block' : 'none'; });
+  noteText?.addEventListener('input', ()=> state.noteText = noteText.value);
+  special.addEventListener('input', ()=> state.special = special.value);
+  card.querySelector('#back').addEventListener('click', ()=>{ popCard(); next(()=> pushCard(cardPalette())); });
+  card.querySelector('#next').addEventListener('click', ()=>{ popCard(); next(()=> pushCard(cardDelivery())); });
+  return card;
+}
+
+function cardDelivery(){
+  setStepActive(3);
+  const card = document.createElement('article');
+  card.className = 'card';
+  const today = new Date().toISOString().split('T')[0];
+  card.innerHTML = `
+    <h2>Delivery Details</h2>
+    <div class="row">
+      <div>
+        <label for="date"><strong>Delivery Date</strong></label>
+        <input id="date" type="date" min="${today}" value="${state.deliveryDate||''}"/>
+        <div class="hint">All arrangements are delivered.</div>
+      </div>
+      <div>
+        <label for="addr"><strong>Delivery Address</strong></label>
+        <input id="addr" type="text" placeholder="Street, City, ZIP" value="${state.address||''}"/>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="next" disabled>Review</button>
+    </div>
+  `;
+  const date = card.querySelector('#date');
+  const addr = card.querySelector('#addr');
+  const nextBtn = card.querySelector('#next');
+  function validate(){ state.deliveryDate = date.value; state.address = addr.value.trim(); nextBtn.disabled = !(state.deliveryDate && state.address); }
+  date.addEventListener('input', validate); addr.addEventListener('input', validate); validate();
+  card.querySelector('#back').addEventListener('click', ()=>{ popCard(); next(()=> pushCard(cardPersonal())); });
+  nextBtn.addEventListener('click', ()=>{ popCard(); next(()=> pushCard(cardReview())); });
+  return card;
+}
+
+function niceSizeLabel(id){
+  if(id==='petite') return 'Petite Whimsy';
+  if(id==='classic') return 'Classic Wonder';
+  if(id==='grand') return 'Grand Enchantment';
+  return id;
+}
+function nicePaletteLabel(id){
+  const m = palettes.find(p=>p.id===id);
+  return m? m.title : id;
+}
+
+function cardReview(){
+  setStepActive(4);
+  const card = document.createElement('article');
+  card.className = 'card';
+  const summaryHtml = `
+    <div class="summary">
+      <div><strong>Size:</strong> ${niceSizeLabel(state.size)}</div>
+      <div><strong>Palette:</strong> ${nicePaletteLabel(state.palette)}</div>
+      <div><strong>Handwritten Card:</strong> ${state.noteCard? 'Yes' : 'No'}</div>
+      ${state.noteCard && state.noteText ? `<div><strong>Message:</strong> “${escapeHtml(state.noteText)}”</div>`:''}
+      ${state.special ? `<div><strong>Special Requests:</strong> ${escapeHtml(state.special)}</div>`:''}
+      <div><strong>Delivery:</strong> ${state.deliveryDate} to ${escapeHtml(state.address)}</div>
+    </div>
+  `;
+  card.innerHTML = `
+    <h2>Review & Checkout</h2>
+    <p class="hint">Everything look right? You can go back to adjust before checkout.</p>
+    ${summaryHtml}
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="checkout">Checkout</button>
+    </div>
+  `;
+  card.querySelector('#back').addEventListener('click', ()=>{ popCard(); next(()=> pushCard(cardDelivery())); });
+  card.querySelector('#checkout').addEventListener('click', ()=>{
+    const payload = {...state};
+    console.log('CHECKOUT PAYLOAD', payload);
+    card.querySelector('#checkout').textContent = 'Added!';
+    card.querySelector('#checkout').disabled = true;
+  });
+  return card;
+}
+
+/* -------- Helpers -------- */
+function escapeHtml(str=''){ return str.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' }[m])); }
+
+/* -------- Init -------- */
+pushCard(cardSize());
+</script>
+</body>
+</html>
