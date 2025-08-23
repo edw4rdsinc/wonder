@@ -1,1 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Whimsy & Wonder – Floral Subscription Widget</title>
+<style>
+  :root{
+    --ink:#0e0b0a; --gild:#b48a2a; --ivory:#f5efe6;
+    --shadow: 0 12px 30px rgba(0,0,0,.35);
+    --card: linear-gradient(180deg, rgba(32,25,22,.85), rgba(20,14,12,.92));
+  }
+  body{margin:0;font-family:ui-sans-serif,system-ui; background:#0c0908; color:var(--ivory);}
+  .wrap{min-height:100%; display:grid; grid-template-rows:auto 1fr;}
+  header{padding:24px 20px 0; max-width:960px; margin:0 auto;}
+  .brand{display:flex; gap:10px; align-items:baseline}
+  .brand h1{margin:0;font-size:28px;}
+  .brand .tag{color:var(--gild); font-variant:small-caps}
+  .widget{max-width:960px;margin:18px auto 60px;padding:20px;}
+  .progress{display:flex; gap:8px; margin-bottom:14px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#3a2d29}
+  .dot.active{background:var(--gild)}
+  .stack{display:grid;gap:14px;}
+  .card{border:1px solid rgba(180,138,42,.22); background:var(--card); border-radius:16px; padding:18px; box-shadow:var(--shadow)}
+  .card h2{margin:4px 0 10px;}
+  .hint{opacity:.85;font-size:14px;margin-bottom:8px}
+  .policy{font-size:13px;opacity:.85;margin:6px 0;padding:6px 10px;border-left:3px solid var(--gild);}
+  .grid{display:grid;gap:10px}
+  .grid.cols-3{grid-template-columns:repeat(1,minmax(0,1fr))}
+  @media(min-width:720px){ .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .opt{border:1px solid rgba(180,138,42,.22);border-radius:12px;padding:12px;cursor:pointer;background:rgba(255,255,255,.03)}
+  .opt.active{outline:2px solid var(--gild);border-color:var(--gild)}
+  .opt .title{font-weight:600}
+  .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+  .btn{background:linear-gradient(180deg,#caa145,#a77e1f);border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--gild);border:1px solid rgba(180,138,42,.45)}
+  .summary{font-size:14px;line-height:1.5;border-top:1px dashed rgba(180,138,42,.35);padding-top:10px;margin-top:10px}
+  input, textarea{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(180,138,42,.25);
+    background:rgba(255,255,255,.03); color:var(--ivory); outline:none;
+  }
+  textarea{min-height:90px; resize:vertical}
+  .inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .note{font-size:12px; opacity:.9; margin-top:6px}
+  .note.ok{color:#b7e4c7}
+  .note.warn{color:#ffd166}
+  .palette{height:110px;border-radius:8px;border:1px solid rgba(180,138,42,.2);background-size:cover;background-position:center;margin-bottom:6px;filter:saturate(.95) contrast(1.05)}
+  /* placeholder tiles; swap for real photos */
+  .p-soft{background-image:linear-gradient(135deg,#f2d9df,#f6efe7 60%, #d9cfd0)}
+  .p-golden{background-image:linear-gradient(135deg,#ffd277,#f6a36a 50%,#f7d4a8)}
+  .p-moody{background-image:linear-gradient(135deg,#3a0d12,#2b0a2b 50%,#110910)}
+  .p-whimsy{background-image:linear-gradient(135deg,#e94a8a,#ffd85f 45%,#7ed957)}
+  .p-ethereal{background-image:linear-gradient(135deg,#b8c7e6,#cfd8f6 50%,#b7d0c5)}
+  .p-still{background-image:linear-gradient(135deg,#6d1f25,#0f1e3a 50%,#b48a2a)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Whimsy & Wonder</h1><div class="tag">Floral Subscription</div>
+    </div>
+  </header>
+  <main class="widget" aria-live="polite">
+    <div class="progress" id="progress">
+      <div class="dot active" title="Frequency"></div>
+      <div class="dot" title="Size"></div>
+      <div class="dot" title="Palette"></div>
+      <div class="dot" title="Personal Touch"></div>
+      <div class="dot" title="Delivery"></div>
+      <div class="dot" title="Review"></div>
+    </div>
+    <section class="stack" id="stack"></section>
+  </main>
+</div>
+
+<script>
+/* ---- Pricing ---- */
+const PRICE = { weekly: 70000, biweekly: 37500 }; // cents
+const CURRENCY = 'USD';
+
+/* ---- State ---- */
+const state = {
+  productType: 'subscription',
+  frequency: null,           // 'weekly' | 'biweekly'
+  size: 'classic',           // fixed: Classic Wonder (Medium)
+  palette: null,             // 'soft'|'golden'|'moody'|'whimsy'|'ethereal'|'still'|'secret'
+  noteCard: false,
+  noteText: '',
+  special: '',
+  firstDeliveryDate: '',     // Monday only
+  address: '',
+  priceCents: 0
+};
+
+/* ---- Palette Options ---- */
+const palettes = [
+  {id:'soft',    title:'Soft Romance',       cls:'p-soft',    desc:'Blush, ivory, and dusty pinks with airy greens.'},
+  {id:'golden',  title:'Golden Joy',         cls:'p-golden',  desc:'Sunlit yellows, apricots, and warm peaches.'},
+  {id:'moody',   title:'Moody Enchantment',  cls:'p-moody',   desc:'Deep burgundy, plum, and midnight tones.'},
+  {id:'whimsy',  title:'Garden Whimsy',      cls:'p-whimsy',  desc:'Playful mix of bright colors and textures.'},
+  {id:'ethereal',title:'Ethereal Meadow',    cls:'p-ethereal',desc:'Soft blues, lavender, and silvery greens.'},
+  {id:'still',   title:'Still Life Splendor',cls:'p-still',   desc:'Jewel tones with dramatic contrast (Dutch masters).'},
+  {id:'secret',  title:'The Secret Garden',  cls:'p-still',   desc:'Artist’s choice — a surprise from the freshest blooms.'},
+];
+
+/* ---- Utilities ---- */
+const stack = document.getElementById('stack');
+const progress = document.getElementById('progress').children;
+function setStepActive(i){ [...progress].forEach((d,idx)=>d.classList.toggle('active', idx<=i)) }
+function pushCard(el){ stack.appendChild(el) }
+function popCard(){ stack.lastElementChild?.remove() }
+function niceMoney(c){ return new Intl.NumberFormat('en-US',{style:'currency',currency:CURRENCY}).format(c/100) }
+function nicePaletteLabel(id){ const m = palettes.find(p=>p.id===id); return m? m.title : id; }
+
+/* Monday helpers */
+function nextMonday(fromDate=new Date()){
+  const d = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+  const add = (8 - d.getDay()) % 7 || 7; d.setDate(d.getDate() + add); return d;
+}
+function toISODate(d){ return d.toISOString().slice(0,10) }
+function isMondayISO(iso){ if(!iso) return false; return new Date(iso+'T00:00:00').getDay()===1 }
+
+/* ---- Cards ---- */
+function cardFrequency(){
+  setStepActive(0);
+  const c = document.createElement('article'); c.className='card';
+  c.innerHTML = `
+    <h2>Choose Frequency</h2>
+    <p class="hint">Open‑ended subscription — pause or cancel anytime.</p>
+    <div class="policy">📦 Deliveries are always on <strong>Mondays</strong>. Changes must be received by <strong>Friday 11:59 PM</strong> to apply to the upcoming Monday.</div>
+    <div class="grid">
+      <label class="opt"><input type="radio" name="freq" value="weekly"><div class="title">Weekly</div><div>${niceMoney(PRICE.weekly)} per delivery</div></label>
+      <label class="opt"><input type="radio" name="freq" value="biweekly"><div class="title">Every Other Week</div><div>${niceMoney(PRICE.biweekly)} per delivery</div></label>
+    </div>
+    <div class="actions"><button class="btn" id="next" disabled>Next</button></div>`;
+  c.querySelectorAll('.opt').forEach(l=>l.addEventListener('click',()=>{
+    c.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+    l.classList.add('active');
+    state.frequency = l.querySelector('input').value;
+    state.priceCents = PRICE[state.frequency];
+    c.querySelector('#next').disabled = false;
+  }));
+  c.querySelector('#next').onclick = ()=>{ popCard(); pushCard(cardSize()) };
+  return c;
+}
+
+function cardSize(){
+  setStepActive(1);
+  const c = document.createElement('article'); c.className='card';
+  c.innerHTML = `
+    <h2>Size</h2>
+    <p class="hint">For subscriptions, we craft the <strong>Classic Wonder</strong> (Medium) — balanced and versatile for weekly rhythm.</p>
+    <div class="opt active" style="cursor:default">
+      <div class="title">Classic Wonder</div>
+      <div>Medium arrangement (subscription standard)</div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="next">Next</button>
+    </div>`;
+  c.querySelector('#back').onclick = ()=>{ popCard(); pushCard(cardFrequency()) };
+  c.querySelector('#next').onclick = ()=>{ popCard(); pushCard(cardPalette()) };
+  return c;
+}
+
+function cardPalette(){
+  setStepActive(2);
+  const c = document.createElement('article'); c.className='card';
+  c.innerHTML = `
+    <h2>Choose Mood / Palette</h2>
+    <p class="hint">Pick the feeling. Photos are examples; flowers vary with season.</p>
+    <div class="grid cols-3" role="group" aria-label="Palette options">
+      ${palettes.map(p=>`
+        <label class="opt">
+          <input type="radio" name="palette" value="${p.id}">
+          <div class="palette ${p.cls}" aria-hidden="true"></div>
+          <div class="title">${p.title}</div>
+          <div style="opacity:.85">${p.desc}</div>
+        </label>
+      `).join('')}
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="next" disabled>Next</button>
+    </div>`;
+  c.querySelectorAll('.opt').forEach(l=>l.addEventListener('click',()=>{
+    c.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+    l.classList.add('active');
+    state.palette = l.querySelector('input').value;
+    c.querySelector('#next').disabled = !state.palette;
+  }));
+  c.querySelector('#back').onclick = ()=>{ popCard(); pushCard(cardSize()) };
+  c.querySelector('#next').onclick = ()=>{ popCard(); pushCard(cardPersonal()) };
+  return c;
+}
+
+function cardPersonal(){
+  setStepActive(3);
+  const c = document.createElement('article'); c.className='card';
+  c.innerHTML = `
+    <h2>Personal Touch</h2>
+    <div class="grid">
+      <div class="opt" style="cursor:default">
+        <div class="inline">
+          <input type="checkbox" id="noteToggle">
+          <label for="noteToggle"><strong>Handwritten Card (first delivery only)</strong></label>
+        </div>
+        <div id="noteArea" style="display:none; margin-top:8px">
+          <textarea id="noteText" maxlength="200" placeholder="Your message for the first delivery (max 200 characters)"></textarea>
+          <div class="hint">Tip: Keep it short so it looks lovely on paper.</div>
+        </div>
+      </div>
+      <div class="opt" style="cursor:default">
+        <label for="special"><strong>Special Requests</strong></label>
+        <textarea id="special" placeholder="Allergies, favorite flowers, delivery notes, etc. (optional)"></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="next">Next</button>
+    </div>`;
+  const noteToggle = c.querySelector('#noteToggle');
+  const noteArea   = c.querySelector('#noteArea');
+  const noteText   = c.querySelector('#noteText');
+  const special    = c.querySelector('#special');
+
+  noteToggle.addEventListener('change',()=>{ state.noteCard = noteToggle.checked; noteArea.style.display = state.noteCard ? 'block':'none'; });
+  noteText.addEventListener('input',()=> state.noteText = noteText.value);
+  special.addEventListener('input',()=> state.special = special.value);
+
+  c.querySelector('#back').onclick = ()=>{ popCard(); pushCard(cardPalette()) };
+  c.querySelector('#next').onclick = ()=>{ popCard(); pushCard(cardDelivery()) };
+  return c;
+}
+
+function cardDelivery(){
+  setStepActive(4);
+  const c = document.createElement('article'); c.className='card';
+  const minMondayISO = toISODate(nextMonday());
+  c.innerHTML = `
+    <h2>Delivery Details</h2>
+    <div class="policy">🚚 All subscriptions deliver on <strong>Mondays</strong>. Choose your starting Monday below.<br>
+    ⏰ Changes must be received by <strong>Friday 11:59 PM</strong> to apply to the upcoming Monday.</div>
+    <div class="grid">
+      <div>
+        <label for="date"><strong>First Delivery (Monday only)</strong></label>
+        <input id="date" type="date" min="${minMondayISO}" step="7" value="${minMondayISO}">
+        <div id="dateNote" class="note ok">Next available Monday is selected.</div>
+      </div>
+      <div>
+        <label for="addr"><strong>Delivery Address</strong></label>
+        <input id="addr" type="text" placeholder="Street, City, ZIP">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="review" disabled>Review</button>
+    </div>`;
+  const dateEl = c.querySelector('#date');
+  const addrEl = c.querySelector('#addr');
+  const noteEl = c.querySelector('#dateNote');
+  const reviewBtn = c.querySelector('#review');
+
+  function enforceMonday(){
+    const val = dateEl.value;
+    if(!isMondayISO(val)){
+      const nm = nextMonday(new Date(val));
+      dateEl.value = toISODate(nm);
+      noteEl.textContent = 'Adjusted to the next Monday.'; noteEl.className='note warn';
+    }else{ noteEl.textContent = 'Monday selected.'; noteEl.className='note ok'; }
+  }
+  enforceMonday();
+
+  function validate(){
+    state.firstDeliveryDate = dateEl.value;
+    state.address = addrEl.value.trim();
+    reviewBtn.disabled = !(state.firstDeliveryDate && state.address);
+  }
+  dateEl.addEventListener('input', ()=>{ enforceMonday(); validate(); });
+  addrEl.addEventListener('input', validate);
+
+  c.querySelector('#back').onclick = ()=>{ popCard(); pushCard(cardPersonal()) };
+  reviewBtn.onclick = ()=>{ popCard(); pushCard(cardReview()) };
+
+  return c;
+}
+
+function cardReview(){
+  setStepActive(5);
+  const c = document.createElement('article'); c.className='card';
+  c.innerHTML = `
+    <h2>Review & Complete</h2>
+    <div class="summary">
+      <div><strong>Frequency:</strong> ${state.frequency==='weekly'?'Weekly':'Every Other Week'}</div>
+      <div><strong>Plan Price:</strong> ${niceMoney(state.priceCents)} per delivery</div>
+      <div><strong>Size:</strong> Classic Wonder (Medium)</div>
+      <div><strong>Palette:</strong> ${nicePaletteLabel(state.palette)}</div>
+      <div><strong>Handwritten Card (first delivery):</strong> ${state.noteCard?'Yes':'No'}</div>
+      ${state.noteCard && state.noteText ? `<div><strong>Message:</strong> “${state.noteText.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}”</div>`:''}
+      ${state.special ? `<div><strong>Special Requests:</strong> ${state.special.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}</div>`:''}
+      <div><strong>First Delivery:</strong> ${state.firstDeliveryDate} (Monday)</div>
+      <div><strong>Address:</strong> ${state.address}</div>
+      <div><strong>Policy:</strong> Monday deliveries only. Changes due Friday 11:59 PM for the next delivery.</div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="back">Back</button>
+      <button class="btn" id="complete">Complete My Order</button>
+    </div>`;
+  c.querySelector('#back').onclick = ()=>{ popCard(); pushCard(cardDelivery()) };
+  c.querySelector('#complete').onclick = ()=>{
+    const payload = {
+      productType: 'subscription',
+      frequency: state.frequency,
+      size: 'classic',
+      palette: state.palette,
+      noteCard: state.noteCard,
+      noteText: state.noteText,
+      special: state.special,
+      firstDeliveryDate: state.firstDeliveryDate,
+      address: state.address,
+      currency: CURRENCY,
+      priceCents: state.priceCents,
+      priceDisplay: niceMoney(state.priceCents),
+      policy: 'Monday deliveries. Changes due Friday 11:59 PM.'
+    };
+    console.log('SUBSCRIPTION CHECKOUT PAYLOAD', payload);
+    const btn = c.querySelector('#complete');
+    btn.textContent = 'Order Complete!';
+    btn.disabled = true;
+
+    // Hook for backend:
+    // window.dispatchEvent(new CustomEvent('start-subscription', { detail: payload }));
+  };
+  return c;
+}
+
+/* ---- Init ---- */
+pushCard(cardFrequency());
+</script>
+</body>
+</html>
+
 
